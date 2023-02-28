@@ -26,12 +26,13 @@ To build fpt outside the container follow these steps (assuming ubuntu). ${path_
 3) In ${path_to_FPT_repo}/lib download boost-1.81.0
 
     ```
-    cd FPT/lib
+    mkdir ${path_to_FPT_repo}/lib 
+    cd ${path_to_FPT_repo}/lib
     wget https://boostorg.jfrog.io/artifactory/main/release/1.81.0/source/boost_1_81_0.tar.gz
     tar -xf boost_1_81_0.tar.gz
     rm boost_1_81_0.tar.gz
     ```
-
+    
 4) in ${path_to_FPT_repo}/lib download eigen-3.4.0
 
     ```
