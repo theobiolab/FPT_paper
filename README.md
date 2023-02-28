@@ -48,7 +48,7 @@ To build fpt has outside the container follow these steps (assuming ubuntu). ${p
     make
     make install
     make clean
-    export PYTHONPATH=$PYTHONPATH:/home/fpt/bin
+    export PYTHONPATH=$PYTHONPATH:${path_to_FPT_repo}/bin
     ```
 
 
