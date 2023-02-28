@@ -51,7 +51,7 @@ To build fpt outside the container follow these steps (assuming ubuntu). ${path_
     export PYTHONPATH=$PYTHONPATH:${path_to_FPT_repo}/bin
     ```
 
-
+# How to enter the container
 
 
 
