@@ -29,19 +29,19 @@ rm boost_1_81_0.tar.gz
 ```
 4) in ${path_to_FPT_repo}/lib download eigen-3.4.0
 ```
-    cd ${path_to_FPT_repo}/lib
-    wget https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz
-    tar -xf eigen-3.4.0.tar.gz
-    rm eigen-3.4.0.tar.gz
+cd ${path_to_FPT_repo}/lib
+wget https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz
+tar -xf eigen-3.4.0.tar.gz
+rm eigen-3.4.0.tar.gz
 ```
 5) install fpt
-```
+    ```
     cd ${path_to_FPT_repo}
     make
     make install
     make clean
     export PYTHONPATH=$PYTHONPATH:/home/fpt/bin
-```
+    ```
 
 
 
