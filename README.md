@@ -8,7 +8,7 @@ sudo singularity build fpt_singularity_container.sif fpt_singularity_container.d
 ```
 This needs singularity >= 3.10.5. To install singularity follow these instructions https://apptainer.org/user-docs/master/quick_start.html
 
-To build fpt has outside the container follow these steps (assuming ubuntu). ${path_to_FPT_repo} represents the path to the FPT repository you cloned.  
+To build fpt outside the container follow these steps (assuming ubuntu). ${path_to_FPT_repo} represents the path to the FPT repository you cloned.  
 1) Download libmpfr and libmpc headers:
    
     ```
