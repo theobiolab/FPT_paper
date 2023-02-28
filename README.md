@@ -10,31 +10,39 @@ This needs singularity >= 3.10.5. To install singularity follow these instructio
 
 To build fpt has outside the container follow these steps (assuming ubuntu). ${path_to_FPT_repo} represents the path to the cloned FPT repository.  
 1) Download libmpfr and libmpc headers:
-```
-sudo apt-get install -y build-essential
-sudo apt-get install -y libmpfr-dev
-sudo apt-get install -y libmpc-dev
-```
+   
+    ```
+    sudo apt-get install -y build-essential
+    sudo apt-get install -y libmpfr-dev
+    sudo apt-get install -y libmpc-dev
+    ```
+    
 2) Download python3 and pybind11:
-```
-apt-get install -y python3.8 python3-pip
-pip3 install pybind11
-```
+
+    ```
+    apt-get install -y python3.8 python3-pip
+    pip3 install pybind11
+    ```
 3) In ${path_to_FPT_repo}/lib download boost-1.81.0
-```
-cd FPT/lib
-wget https://boostorg.jfrog.io/artifactory/main/release/1.81.0/source/boost_1_81_0.tar.gz
-tar -xf boost_1_81_0.tar.gz
-rm boost_1_81_0.tar.gz
-```
+
+    ```
+    cd FPT/lib
+    wget https://boostorg.jfrog.io/artifactory/main/release/1.81.0/source/boost_1_81_0.tar.gz
+    tar -xf boost_1_81_0.tar.gz
+    rm boost_1_81_0.tar.gz
+    ```
+
 4) in ${path_to_FPT_repo}/lib download eigen-3.4.0
-```
-cd ${path_to_FPT_repo}/lib
-wget https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz
-tar -xf eigen-3.4.0.tar.gz
-rm eigen-3.4.0.tar.gz
-```
+
+    ```
+    cd ${path_to_FPT_repo}/lib
+    wget https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz
+    tar -xf eigen-3.4.0.tar.gz
+    rm eigen-3.4.0.tar.gz
+    ```
+
 5) install fpt
+    
     ```
     cd ${path_to_FPT_repo}
     make
