@@ -40,6 +40,7 @@ rm boost_1_81_0.tar.gz
     make
     make install
     make clean
+    export PYTHONPATH=$PYTHONPATH:/home/fpt/bin
 ```
 
 
