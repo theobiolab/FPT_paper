@@ -1,0 +1,57 @@
+BootStrap: library
+From: ubuntu:20.04
+
+%files 
+    /home/giorava/Harvard_work/fpt /home
+
+%post
+    export DEBIAN_FRONTEND=noninteractive
+    
+    apt-get update
+    apt update && apt upgrade -y
+
+    echo "#################################################################################"
+    echo "######################### set up linux essentials ###############################"
+    echo "#################################################################################"
+    apt-get install -y build-essential
+    apt-get install -y libmpfr-dev
+    apt-get install -y libmpc-dev
+    apt-get install -y autotools-dev libicu-dev libbz2-dev libboost-all-dev
+    apt-get install -y wget tar unzip git 
+    apt-get install -y python3.8 python3-pip
+    pip3 install pybind11
+    pip3 install scipy
+    pip3 install matplotlib
+    pip3 install pandas
+
+    echo "#################################################################################"
+    echo "##################### set up boost-1.81.0 essentials ############################"
+    echo "#################################################################################"
+    cd /usr/lib
+    wget https://boostorg.jfrog.io/artifactory/main/release/1.81.0/source/boost_1_81_0.tar.gz
+    tar -xf boost_1_81_0.tar.gz
+    rm boost_1_81_0.tar.gz
+
+    echo "#################################################################################"
+    echo "###################### set up eigen-3.4.0 essentials ############################"
+    echo "#################################################################################"
+    cd /usr/lib
+    wget https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz
+    tar -xf eigen-3.4.0.tar.gz
+    rm eigen-3.4.0.tar.gz
+
+    echo "#################################################################################"
+    echo "############################### build fpt #######################################"
+    echo "#################################################################################"
+    cd /home/fpt
+    make
+    make install
+    make clean
+
+    unset DEBIAN_FRONTEND
+
+%runscript
+    export PYTHONPATH=$PYTHONPATH:/home/fpt/bin
+
+
+
