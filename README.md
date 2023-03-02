@@ -53,6 +53,16 @@ To build fpt outside the container follow these steps (assuming ubuntu). ${path_
     ```
 
 # How to enter the container
+Locate the .sif file and save the absolute path in the variable path_to_sif. To activate the container type: 
 
+```
+singularity shell ${path_to_sif}
+```
 
+You can also bind specific folders in your local system by using the B flag. 
 
+```
+singularity shell -B /path/to/bind:path/to/bind ${path_to_sif}
+```
+
+Within the container the directory is mounted at /path/to/bind. 
