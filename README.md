@@ -20,7 +20,7 @@ To build fpt outside the container follow these steps (assuming ubuntu). ${path_
 2) Download python3 and pybind11:
 
     ```
-    apt-get install -y python3.8 python3-pip
+    sudo apt-get install -y python3.8 python3-pip
     pip3 install pybind11
     ```
 3) In ${path_to_FPT_repo}/lib download boost-1.81.0
