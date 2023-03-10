@@ -10,7 +10,7 @@ This needs singularity >= 3.10.5. To install singularity follow these instructio
 
 # Build outside the container
 
-Rules for building outside the container are present in the makefile. These are based on ubuntu>=20.04. If you have a windows system we recomend installing Windows Sub Linux with ubuntu 22.04 (https://ubuntu.com/tutorials/install-ubuntu-on-wsl2-on-windows-10#1-overview). 
+Rules for building outside the container are present in the makefile. These are based on ubuntu>=20.04 (for now). If you have a windows system we recomend installing Windows Sub Linux with ubuntu 22.04 (https://ubuntu.com/tutorials/install-ubuntu-on-wsl2-on-windows-10#1-overview). 
 
 1) clone the repository
 
