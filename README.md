@@ -8,7 +8,9 @@ sudo singularity build fpt_singularity_container.sif fpt_singularity_container.d
 ```
 This needs singularity >= 3.10.5. To install singularity follow these instructions https://apptainer.org/user-docs/master/quick_start.html
 
-To build fpt outside the container follow these steps (assuming ubuntu>=20.04). 
+# Build outside the container
+
+Rules for building outside the container are present in the makefile. These are based on ubuntu>=20.04. If you have a windows system we recomend installing Windows Sub Linux with ubuntu 22.04 (https://ubuntu.com/tutorials/install-ubuntu-on-wsl2-on-windows-10#1-overview). 
 
 1) clone the repository
 
