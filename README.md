@@ -26,7 +26,15 @@ To build fpt outside the container follow these steps (assuming ubuntu>=20.04).
    make clear
    ```
 
-the binaries are now installed in the ```./bin``` folder
+   the binaries are now installed in the ```bin``` folder
+   
+4) To access the modules from python we need to add ```bin``` to python path
+
+   ```
+   export PYTHONPATH=$PYTHONPATH:$(path_to_repo)/bin
+   ```
+
+
 
 
 # How to enter the container
