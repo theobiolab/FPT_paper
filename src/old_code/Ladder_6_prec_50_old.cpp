@@ -47,9 +47,9 @@ IOType compute_response(Matrix<IOType,Dynamic,1> ss_vector){
 
 }
 
-#include "../include/scoring2D.hpp"
+#include "../include/scoring2D_old.hpp"
 
-const int MANTISSA_PRECISION = 100;
+const int MANTISSA_PRECISION = 50;
 typedef boost::multiprecision::number<boost::multiprecision::mpfr_float_backend<MANTISSA_PRECISION>> PreciseType;
 
 template <typename T, typename IOType> 
@@ -121,8 +121,8 @@ class childScoring: public scoring2D<T, IOType>{
 
 
 
-PYBIND11_MODULE(Ladder_6_prec_100, m){
-    py::class_<childScoring<PreciseType, long double>>(m, "Ladder_6_prec_100")
+PYBIND11_MODULE(Ladder_6_prec_50, m){
+    py::class_<childScoring<PreciseType, long double>>(m, "Ladder_6_prec_50")
         .def(py::init())
         .def("getLaplacian",          &childScoring<PreciseType, long double>::get_laplacian)
         .def("setLaplacian_ladder_6", &childScoring<PreciseType, long double>::set_ladder_3_laplacian)
@@ -132,19 +132,16 @@ PYBIND11_MODULE(Ladder_6_prec_100, m){
         .def("mult_laplacian_TF",     &childScoring<PreciseType, long double>::set_laplacian_TF_class) 
         .def("getLaplacianTF",        &childScoring<PreciseType, long double>::get_laplacian_TF)
         .def("simple_score",          &childScoring<PreciseType, long double>::SimpleScore, 
-                                        py::arg("TF_range_for_score"), py::arg("n_TF_conc_points"), py::arg("low_acc"), py::arg("up_acc"))
-        .def("triming",               &childScoring<PreciseType, long double>::trim_range_response, 
-                                        py::arg("TF_range"), py::arg("n_points"), py::arg("deltaTH"))
-        .def("redef_score_RESP",      &childScoring<PreciseType, long double>::redef_score_RESP, 
-                                        py::arg("n_points"), py::arg("deltaTH"), py::arg("low_acc"), py::arg("up_acc"))
-        .def("redef_score_noRESP",    &childScoring<PreciseType, long double>::redef_score_noRESP, 
-                                        py::arg("TF_range_noresp"), py::arg("n_points"), py::arg("deltaTH"), py::arg("low_acc"), py::arg("up_acc"))
+                                        py::arg("TF_range_for_score"), py::arg("n_TF_conc_points"))
         .def("monotonicity",          &childScoring<PreciseType, long double>::monotonicity_test,
                                         py::arg("range_to_check"), py::arg("n_points_for_ss"), py::arg("delta_TH"))        
         .def("score_no_response",     &childScoring<PreciseType, long double>::scoreNoResponse, 
-                                        py::arg("TF_range_for_score"), py::arg("n_points_for_ss"), py::arg("delta_TH"), py::arg("low_acc"), py::arg("up_acc"))      
+                                        py::arg("TF_range_for_score"), py::arg("n_points_for_ss"), py::arg("delta_TH"))      
         .def("score_response",        &childScoring<PreciseType, long double>::scoreWithResponse,
-                                        py::arg("n_points_for_ss"), py::arg("delta_TH"), py::arg("low_acc"), py::arg("up_acc"));
+                                        py::arg("n_points_for_ss"), py::arg("delta_TH"))
+        .def("score_2Dgaus_delta",    &childScoring<PreciseType, long double>::score2DgaussianDelta, 
+                                        py::arg("starting_TF_range"), py::arg("TF_range_no_response"), 
+                                        py::arg("n_points_score"), py::arg("n_points_ss"), py::arg("delta_TH")); 
 }
 
 
