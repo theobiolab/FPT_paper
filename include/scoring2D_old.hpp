@@ -6,7 +6,6 @@
 #include <pybind11/eigen.h>   //return matrices in python
 #include <pybind11/embed.h>
 #include <pybind11/stl.h> 
-#include <cstdlib>
 
 #include <iostream>
 #include <stdlib.h>
@@ -39,11 +38,27 @@ class scoring2D {
         Matrix<T, Dynamic, Dynamic>  laplacian;      // laplacian matrix   
         Matrix<T, Dynamic, Dynamic>  laplacian_TF; 
         
+        py::module scipy = py::module::import("scipy.interpolate");
+        py::function interp1d = scipy.attr("interp1d"); 
+        
         IOType gaussian_score(IOType new_point, IOType initial_point, IOType std)
         {
             IOType rel_new_point = (new_point-initial_point)/initial_point;
             IOType exp_fact = -(1.0/2.0)*((rel_new_point*rel_new_point)/(std*std));            
             return exp(exp_fact);          
+        }
+        
+        IOType gaussian_2D_score(IOType new_point_mean, IOType initial_point_mean, 
+                                 IOType new_point_CV, IOType initial_point_CV,
+                                 IOType std)
+        {
+            IOType rel_MEAN = (new_point_mean-initial_point_mean)/initial_point_mean;
+            IOType rel_CV   = (new_point_CV-initial_point_CV)/initial_point_CV;
+            
+            IOType exp_fact_MEAN = (1.0/2.0)*((rel_MEAN*rel_MEAN)/(std*std));
+            IOType exp_fact_CV   = (1.0/2.0)*((rel_CV*rel_CV)/(std*std));
+           
+            return exp(-(exp_fact_MEAN+exp_fact_CV));          
         }
         
         std::vector<IOType> derivative(std::vector<IOType> x, std::vector<IOType> y){
@@ -54,19 +69,6 @@ class scoring2D {
             for (int i=1; i<x.size(); i++){
                 IOType dy = y[i]-y[i-1];
                 dy_dx[i-1] = dy/dx; 
-            }   
-            
-            return dy_dx; 
-        }
-        
-        std::vector<IOType> derivative_abs(std::vector<IOType> x, std::vector<IOType> y){
-            
-            IOType dx = x[1]-x[0];  
-            std::vector<IOType> dy_dx(x.size()-1); 
-            
-            for (int i=1; i<x.size(); i++){
-                IOType dy = y[i]-y[i-1];
-                dy_dx[i-1] = std::abs(dy/dx); 
             }   
             
             return dy_dx; 
@@ -147,7 +149,8 @@ class scoring2D {
         }
         
         
-        // Get steady state 
+        // Get steady state
+        
         Matrix<IOType, Dynamic, 1> get_steady_state(bool use_laplacian_TF = false){
             
             Matrix<T,Dynamic,Dynamic> L;
@@ -185,8 +188,7 @@ class scoring2D {
         
         
         // Simple mean-CV scoring
-        Matrix<IOType,2,1> SimpleScore(Matrix<IOType,2,1> TF_range, IOType n_points,
-                                        IOType low_acc, IOType up_acc){
+        Matrix<IOType,2,1> SimpleScore(Matrix<IOType,2,1> TF_range, IOType n_points){
         
             IOType    low = TF_range(0); 
             IOType    up  = TF_range(1);  
@@ -196,34 +198,32 @@ class scoring2D {
             set_laplacian_TF_class(pow(10, low)); 
             Matrix<IOType,2,1> InitialPoint = get_Mean_CV_FPT(true);
             
+            // Filter for mean values in our range of interest  
             // MOST OF THE POINTS ARE DISCARDED IN THIS STEP
-            // Mean filter to avoid numerical artifacts due to too small/big mean values
-            if ((InitialPoint(0)<low_acc)||(InitialPoint(0)>up_acc)){   
+            // if (InitialPoint(0)<400 || InitialPoint(0)>5000){
+            
+            if ((InitialPoint(0)<200)||(InitialPoint(0)>5000)){   // just filter to avoid artifacts due to low mean values 
                  Matrix<IOType,2,1> neg_results; 
                  neg_results << -1.0, -1.0; 
                  return neg_results; 
             } 
             
-            // compute the scores. For each TF concentration the mean and CV scores are computed.
-            // only the lowerst (worst) scores are kept. 
-            IOType      mean_score;     
-            IOType      cv_score;
-            IOType      TF_conc = low+delta; 
-            int         accepted = 0;
+            // compute the scores
+            IOType      mean_score;             
+            IOType TF_conc = low+delta; 
+            int    accepted = 0;
             
             for (int i = 1; i<n_points; i++){
             
-                // initialize the variables mean_score and cv_score
+                // initialize the variable mean_score
                 if (i == 1 || accepted == 0){                
                     set_laplacian_TF_class(pow(10, TF_conc));
                     
                     try{ 
-                    
+                
                         Matrix<IOType,2,1> new_point = get_Mean_CV_FPT(true);       
                         IOType tmp_mean_scores = this->gaussian_score(new_point(0), InitialPoint(0), 0.01);
-                        IOType tmp_cv_scores   = this->gaussian_score(new_point(1), InitialPoint(1), 0.01);
                         
-                        cv_score   = tmp_cv_scores;
                         mean_score = tmp_mean_scores;
         
                         TF_conc  += delta;
@@ -231,14 +231,13 @@ class scoring2D {
                         continue; 
                         
                     } catch (...){
-                    
+                
                         TF_conc += delta;
                         continue; 
-                        
                     }
                 }
                 
-                // compute the scores for each other TF concentration and keep the lowerst scores
+                // compute the scores for each other TF concentration and keep the lowerst mean_score
                 
                 set_laplacian_TF_class(pow(10, TF_conc)); 
                 
@@ -246,18 +245,15 @@ class scoring2D {
                 
                     Matrix<IOType,2,1> new_point = get_Mean_CV_FPT(true);       
                     IOType tmp_mean_scores = this->gaussian_score(new_point(0), InitialPoint(0), 0.01); 
-                    IOType tmp_cv_scores   = this->gaussian_score(new_point(1), InitialPoint(1), 0.01); 
                     
                     // keep only the lowerst mean scores
                     if (tmp_mean_scores<mean_score){
                         mean_score = tmp_mean_scores; 
-                    } 
-                    // keep only the lowest cv score
-                    if (tmp_cv_scores<cv_score){
-                        cv_score = tmp_cv_scores; 
+                        TF_conc += delta;
+                    } else {
+                        TF_conc += delta;
+                        continue;
                     }
-                    
-                    TF_conc += delta;
                     
                 } catch (...){
                 
@@ -266,134 +262,26 @@ class scoring2D {
 
                 }
             }  //end of the for loop          
-                       
+            
+            
+            // compute CV score            
+            set_laplacian_TF_class(pow(10, up));
+            Matrix<IOType,2,1> new_point = get_Mean_CV_FPT(true);       
+            IOType CV_score = this->gaussian_score(new_point(1), InitialPoint(1), 0.05);
+
+            // check that at least one mean_score as been accepted
+            if (accepted==0){ 
+                Matrix<IOType,2,1> neg_results; 
+                neg_results << -1.0, -1.0; 
+                return neg_results;  
+            }
+            
             // return the score            
             Matrix<IOType,2,1> results; 
-            results << mean_score, cv_score;            
+            results << mean_score, CV_score;            
             return results; 
         }
         
-        
-        // compute Delta Response and trim range
-        std::vector<IOType> trim_range_response(Matrix<IOType,Dynamic,1>TF_range,
-                                                 const int n_points, const IOType deltaTH){
-
-
-                        
-        
-            IOType low = TF_range(0);
-            IOType up  = TF_range(1);
-            IOType delta = abs(low-up)/(n_points-1.0); 
-            
-            // initialize a response vector and a concentration vector and compute the delta
-            std::vector<IOType> resp(n_points); 
-            std::vector<IOType> conc_array(n_points);             
-            IOType conc = low;
-            IOType min_resp = Response_class(pow(10, conc)); 
-            IOType max_resp = Response_class(pow(10, conc));  
-            
-            for (int i=0; i<n_points; i++){
-                conc_array[i] = conc; 
-                resp[i] = Response_class(pow(10, conc)); 
-                conc += delta; 
-                
-                if (resp[i] < min_resp){
-                    min_resp = resp[i];
-                }
-                if (resp[i] > max_resp){
-                    max_resp = resp[i]; 
-                }
-            } 
-            
-            IOType deltaResp = max_resp - min_resp;
-            
-            // if the Delta filter is passsed trim the range and return the trimmed range otherwise return the whole range
-            if (deltaResp >= deltaTH){
-                std::vector<IOType> dresp_dTF = this->derivative_abs(conc_array, resp); //logspace derivative
-                IOType new_low;  
-                IOType new_up; 
-                bool   min_acc = false; 
-                
-                for (int i=1; i<dresp_dTF.size(); i++){
-                    if ((abs(dresp_dTF[i])>1e-5)and(abs(dresp_dTF[i-1])<=1e-5)){
-                        if (!min_acc){
-                            new_low = conc_array[i+1];
-                            min_acc = true; 
-                        }
-                    } else if ((abs(dresp_dTF[i-1])>1e-5)and(abs(dresp_dTF[i])<=1e-5)){
-                        new_up  = conc_array[i+1];
-                    } else {
-                        continue;                     
-                    }
-                }
-                
-                // compute the new delta for the trimmed range
-                std::vector<IOType> new_resp_range; 
-                for (int i=0; i<conc_array.size(); i++){
-                    if ((new_low<=conc_array[i])and(conc_array[i]<=new_up)){
-                        IOType resp_tmp = resp[i];                    
-                        new_resp_range.push_back(resp_tmp);   
-                    }
-                }
-                
-                IOType new_max = *max_element(new_resp_range.begin(), new_resp_range.end());
-                IOType new_min = *min_element(new_resp_range.begin(), new_resp_range.end());
-                IOType new_deltaResp = new_max-new_min; 
-                
-                std::vector<IOType> res{new_low, new_up, new_deltaResp}; 
-                return res;      
-            } else {
-                std::vector<IOType> res{low, up, deltaResp};
-                return res;  
-            }
-        }    
-
-        // compute scoring with redefined scoring and trim_range_response 
-        Matrix<IOType,2,1> redef_score_RESP(const int n_points, const IOType deltaTH, 
-                                            const IOType low_acc, const IOType up_acc){
-        
-            // initial range
-            IOType low = -30.0;
-            IOType up  = 30.0;
-            Matrix<IOType,2,1> TF_range; 
-            TF_range << low, up; 
-            
-            // range trimming
-            std::vector<IOType> trimmed_range = trim_range_response(TF_range, n_points, deltaTH);
-            
-            if (trimmed_range[2] >= deltaTH){
-                Matrix<IOType,2,1> new_TF_range; 
-                new_TF_range << trimmed_range[0], trimmed_range[1];
-                return SimpleScore(new_TF_range,15,low_acc,up_acc);
-            } else {
-                Matrix<IOType,2,1> ret;
-                ret << -1.0, -1.0; 
-                return ret;
-            }                                                                            
-        }
-        
-        Matrix<IOType,2,1> redef_score_noRESP(Matrix<IOType,Dynamic,1>TF_range_noresp, 
-                                                const int n_points, const IOType deltaTH, 
-                                                const IOType low_acc, const IOType up_acc){
-            IOType low = -30.0;
-            IOType up  = 30.0;
-            Matrix<IOType,2,1> TF_range; 
-            TF_range << low, up; 
-            
-            std::vector<IOType> trimmed_range = trim_range_response(TF_range, n_points, deltaTH);
-            
-            if (trimmed_range[2] < deltaTH){
-                return SimpleScore(TF_range_noresp,15,low_acc,up_acc);
-            } else {
-                Matrix<IOType,2,1> ret;
-                ret << -1.0, -1.0; 
-                return ret;
-            }                                                                            
-        }
-              
-        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        ////////////////////////////////////////////////////// OLD FUNCTIONS ///////////////////////////////////////////////////////
-        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         
         // Monotonicity check and trimmed range_calculation
         std::vector<IOType> monotonicity_test(Matrix<IOType,Dynamic,1>TF_range,
@@ -461,10 +349,10 @@ class scoring2D {
             }   
         }
         
+        
         // compute scoring with no response -deltaTF<delta<deltaTH
         Matrix<IOType,2,1> scoreNoResponse(Matrix<IOType,Dynamic,1>TF_range_score,
-                                              const int n_points, const IOType deltaTH, 
-                                              const IOType low_acc, const IOType up_acc){
+                                              const int n_points, const IOType deltaTH){
                                                                       
             IOType low = -20.0;
             IOType up  = 20.0;
@@ -509,13 +397,12 @@ class scoring2D {
             }
             
             // costume TF_range 
-            return SimpleScore(TF_range_score, 15, low_acc,up_acc);         
+            return SimpleScore(TF_range_score, 15);         
         }
         
         
         // compute scoring with response -deltaTF<delta<deltaTH
-        Matrix<IOType,2,1> scoreWithResponse(const int n_points, const IOType deltaTH, 
-                                             const IOType low_acc, const IOType up_acc){
+        Matrix<IOType,2,1> scoreWithResponse(const int n_points, const IOType deltaTH){
                                               
             IOType low = -20.0;
             IOType up  = 20.0;
@@ -549,11 +436,162 @@ class scoring2D {
             
             // double check that there is a delta response after the trimming
             
-            return SimpleScore(new_TF_range,15,low_acc,up_acc);                                                                         
+            return SimpleScore(new_TF_range,15);                                                                         
         }
-    
+        
+
+        // compute 2D gaussian scoring
+        IOType helper_2Dgauss_score(Matrix<IOType,Dynamic,1> TF_range, IOType n_points){
+            
+            IOType    low = TF_range(0); 
+            IOType    up  = TF_range(1);  
+            IOType    delta = abs(low-up)/(n_points-1);  
+            
+            // Compute the initial point mean-CV -> first TF concentration
+            set_laplacian_TF_class(pow(10, low)); 
+            Matrix<IOType,2,1> InitialPoint = get_Mean_CV_FPT(true);
+            
+            // Filter for mean values in our range of interest  
+            // MOST OF THE POINTS ARE DISCARDED IN THIS STEP
+            //if (InitialPoint(0)<400 || InitialPoint(0)>5000){
+            if (InitialPoint(0)<200){ 
+                 return -1.0;  
+            }
+            
+            // compute the scores
+            IOType scores;             
+            IOType TF_conc=low+delta; 
+            int    accepted=0;
+            
+            for (int i = 1; i<n_points; i++){
+            
+                // initialize the variable mean_score
+                if (i == 1 || accepted == 0){                
+                    set_laplacian_TF_class(pow(10, TF_conc));
+                    
+                    try{ 
+                
+                        Matrix<IOType,2,1> new_point = get_Mean_CV_FPT(true);       
+                        IOType tmp_scores = this->gaussian_2D_score(new_point(0), InitialPoint(0), 
+                                                                    new_point(1), InitialPoint(1), 0.01);
+                        
+                        scores = tmp_scores;
+        
+                        TF_conc  += delta;
+                        accepted += 1;
+                        continue; 
+                        
+                    } catch (...){
+                
+                        TF_conc += delta;
+                        continue; 
+                    }
+                }
+                
+                // compute the scores for each other TF concentration and keep the lowerst mean_score
+                
+                set_laplacian_TF_class(pow(10, TF_conc)); 
+                
+                try{ 
+                
+                    Matrix<IOType,2,1> new_point = get_Mean_CV_FPT(true);       
+                    IOType tmp_scores = this->gaussian_2D_score(new_point(0), InitialPoint(0), 
+                                                                new_point(1), InitialPoint(1), 0.01);
+                    
+                    // keep only the lowerst mean scores
+                    if (tmp_scores<scores){
+                        scores = tmp_scores; 
+                        TF_conc += delta;
+                    } else {
+                        TF_conc += delta;
+                        continue;
+                    }
+                    
+                } catch (...){
+                
+                    TF_conc += delta;
+                    continue; 
+
+                }
+            }  //end of the for loop 
+            
+            // check that at least one mean_score as been accepted
+            if (accepted==0){ 
+                return -1.0; 
+            }
+            
+            // return the gaussian score
+            return scores;      
+        }
+        
+        
+        // compute 2D gaussian - delta response scoring
+        Matrix<IOType,2,1> score2DgaussianDelta(Matrix<IOType,Dynamic,1> starting_TF_range,
+                                                      Matrix<IOType,Dynamic,1> TF_range_no_response, 
+                                                      IOType n_points_score, IOType n_points_ss, IOType delta_TH){
+                                                      
+            // compute the delta response, trim TF concentration range, check for monotonicity
+            std::vector<IOType> new_range_mono = monotonicity_test(starting_TF_range, n_points_ss, delta_TH);
+            
+            // return [-1,-1] if non monotonic
+            if (new_range_mono.size()==1){
+                Matrix<IOType,2,1> ret; 
+                ret << -1.0, -1.0; 
+                return ret; 
+            }
+        
+            // compute scoring depending on the response delta 
+            if ((new_range_mono[2] < delta_TH)and(new_range_mono[2] > -delta_TH)){
+            
+                // compute gaussian scoring with TF_range_no_response
+                Matrix<IOType,2,1> res; 
+                
+                IOType gauss = helper_2Dgauss_score(TF_range_no_response, n_points_score);  
+                
+                if (gauss<0){
+                    res << -1.0, -1.0; 
+                    return res; 
+                } else {
+                    res << gauss, new_range_mono[2]; 
+                    return res;
+                }
+                
+            } else if ((new_range_mono[2] >= delta_TH)||(new_range_mono[2] <= -delta_TH)){
+            
+                // compute gaussian scoring with new_range_mono
+                Matrix<IOType,2,1> new_range_TF; 
+                Matrix<IOType,2,1> res; 
+                
+                new_range_TF << new_range_mono[0], new_range_mono[1]; 
+                IOType gauss = helper_2Dgauss_score(new_range_TF, n_points_score);
+                
+                if (gauss<0){
+                    res << -1.0, -1.0; 
+                    return res; 
+                } else {
+                    res << gauss, new_range_mono[2]; 
+                    return res;
+                }
+            }
+        }      
 }; 
+
 #endif 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

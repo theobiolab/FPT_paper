@@ -83,3 +83,4 @@ clean:
 	rm Ladder_6_prec_100.so
 	rm Ladder_6_prec_50.so
 	rm triangle_graph.so
+
