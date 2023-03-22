@@ -25,7 +25,7 @@ Rules for building outside the container are present in the makefile. These are 
    ```
    make all_ubuntu
    make install 
-   make clear
+   make clean
    ```
 
    the binaries are now installed in the ```bin``` folder
