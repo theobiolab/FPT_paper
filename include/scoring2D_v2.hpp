@@ -32,7 +32,7 @@ namespace py=pybind11;
 
 
 template <typename T, typename IOType>
-class scoring2D {
+class scoring2D_v2 {
     
     // protected members can be accessed from inheritaded classes
     protected:        
@@ -196,9 +196,15 @@ class scoring2D {
                 throw;
             }
 
+            for (int i=0; i<steady_state.size();i++){
+                //py::print(i, "before:", steady_state[i]);
+                steady_state[i]=abs(steady_state[i]);
+                //py::print("after:", steady_state[i]);
+            }
+
             T norm = steady_state.sum();
             for (int i=0; i<steady_state.size();i++){
-                std::cout << i << "," << steady_state[i];
+                //std::cout << i << "," << steady_state[i];
                 steady_state[i] = steady_state[i] / norm;
             }
 
