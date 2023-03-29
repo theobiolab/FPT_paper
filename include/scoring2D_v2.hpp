@@ -222,7 +222,7 @@ class scoring2D_v2 {
             
             // Compute the initial point mean-CV -> first TF concentration
             set_laplacian_TF_class(pow(10, low)); 
-            Matrix<IOType,2,1> InitialPoint = get_Mean_CV_FPT(true, false ); //compute only mean. RMC
+            Matrix<IOType,2,1> InitialPoint = get_Mean_CV_FPT(true, true); 
             
             // MOST OF THE POINTS ARE DISCARDED IN THIS STEP
             // Mean filter to avoid numerical artifacts due to too small/big mean values
