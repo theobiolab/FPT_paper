@@ -167,7 +167,7 @@ class scoring2D_v3 {
         // Get steady state 
         Matrix<IOType, Dynamic, 1> get_steady_state(bool use_laplacian_TF = false){ 
             
-              
+            //use a reference to avoid duplicating the matrix
             Matrix<T, Dynamic, Dynamic> &L = chooselap(this->laplacian, this->laplacian_TF,use_laplacian_TF); 
 
             int n_states = L.rows(); 
