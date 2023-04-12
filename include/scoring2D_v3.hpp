@@ -387,7 +387,7 @@ class scoring2D_v3 {
                         continue;                     
                     }
                 }
-                
+                //could we just keep the indexes of the low and high such that we can subset directly??
                 // compute the new delta for the trimmed range
                 std::vector<IOType> new_resp_range; 
                 IOType resp_tmp;
