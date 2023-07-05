@@ -1,4 +1,4 @@
-# First Passage Time on Linear Framwork Graphs
+# First Passage Time on Linear Framework Graphs
 
 A C++ package with Python binding (Pybind11) for First Passage Time calculations on gene regulatory networks using the Linear Framework, partially based on [kmnam/markov-digraphs](https://github.com/kmnam/markov-digraphs.git) from Kee-Myoung Nam.
 
