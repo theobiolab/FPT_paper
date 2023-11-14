@@ -78,7 +78,6 @@ IOType response_function(Matrix<IOType,Dynamic,1> &ss_vector){  //maybe ss_vecto
     //ladder 3 response = Pr^ss(state 3) + Pr^ss(state 3T)
     response = ss_vector[2] + ss_vector[5];
     return response;
-
 }
 
 

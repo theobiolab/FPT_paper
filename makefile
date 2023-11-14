@@ -3,7 +3,7 @@ CFLAGS = -O2 -Wall -shared -std=c++11 -fPIC
 eigen = -I $(shell pwd)/lib/eigen-3.4.0
 boost = -I $(shell pwd)/lib/boost_1_81_0
 pybind11 = `python3 -m pybind11 --includes`
-libs = -lmpfr -lmpc 
+libs = -lmpfr -lmpc
 
 all_container: test_pybind test_boost test_mpfr Ladder_3 Ladder_6 Ladder_6_prec_100 Ladder_6_prec_50 triangle_graph
 ubuntu_setup: dependencies_ubuntu boost eigen test_pybind test_boost test_mpfr
@@ -83,4 +83,4 @@ clean:
 	rm Ladder_6_prec_100.so
 	rm Ladder_6_prec_50.so
 	rm triangle_graph.so
-
+	
