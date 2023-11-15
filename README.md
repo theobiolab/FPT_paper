@@ -11,7 +11,7 @@ cd ${path_to_fpt_repo}
 conda env create -f environment.yml
 conda activate fpt_env
 ```
-## Compiling on macOS 
+### Compiling on macOS 
 Within the environment double check the presence of pybind11 includes by typing 
 ```
 python -m pybind11 --includes
@@ -30,7 +30,7 @@ make --file=Makefile_mac ladders
 ```
 the binaries are authomatically stored in the bin folder of the repository. You can make them available globally or just refer to them in a python script ysing sys.path.insert with the path to FPT/bin. Enjoy the computation :)
 
-## Compiling on Linux
+### Compiling on Linux
 Within the environment double check the presence of pybind11 includes by typing 
 ```
 python -m pybind11 --includes
