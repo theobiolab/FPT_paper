@@ -8,47 +8,30 @@ A C++ package with Python binding (Pybind11) for First Passage Time calculations
 Regardless of the system you are using, the first step is to create a conda environment with the minimal packages requirments for compiling. To install minconda on your system follow these instructions: https://docs.conda.io/projects/miniconda/en/latest/. Once conda is installed, you can proceed with creating the environment:
 ```
 cd ${path_to_fpt_repo}
-conda env create -f environment.yml
+conda create -n "fpt_env" python=3.11.5
 conda activate fpt_env
+conda install pip
+pip install -r minimal_requirments.txt
 ```
-### Compiling on macOS 
-Within the environment double check the presence of pybind11 includes by typing 
+> :warning: **Pybind11 includes:** before proceeding any further double check the presence of pybind11 includes in the environment by typing ``` python -m pybind11 --includes ```. The output should be an absolute path to a ```python3.11``` include file and the ```pybind11``` package include folder within the conda ```fpt_env``` folder in your home (double ckeck).
+
+If the pybind11 includes are in the conda env you can procede with compiling:
 ```
-python -m pybind11 --includes
+make dependencies
 ```
-The output should be an absolute path to a python3.11 include file and the pybind11 package include folder within the conda fpt_env folder in your home (double ckeck). If the pybind11 includes are in the conda env you can procede with compiling: 
+this installes locally all the c/c++ dependencies required (boost, eigen, gmp, mpfr, mpc). Please do this even if you have previously installed these packages, the code is version specific. To test that everything went fine during this step you can compile a series of tests: 
 ```
-make --file=Makefile_mac dependencies 
-```
-this command locally installes all the c/c++ dependencies required (boost, eigen, gmp, mpfr, mpc). Please consider doing this step even if you have previously installed these packages, the code is version specific. To test that everything went fine during this step you can compile a series of tests: 
-```
-make --file=Makefile_mac tests 
+make tests
 ```
 if this step is succesfull you will see binaries in the test folder. To compile the models run
 ```
-make --file=Makefile_mac ladders 
+make ladders 
 ```
-the binaries are authomatically stored in the bin folder of the repository. You can make them available globally or just refer to them in a python script ysing sys.path.insert with the path to FPT/bin. Enjoy the computation :)
+The binaries are stored in the ```/bin``` folder. 
 
-### Compiling on Linux
-Within the environment double check the presence of pybind11 includes by typing 
-```
-python -m pybind11 --includes
-```
-The output should be an absolute path to a python3.11 include file and the pybind11 package include folder within the conda fpt_env folder in your home (double ckeck). If the pybind11 includes are in the conda env you can procede with compiling: 
-```
-make --file=Makefile_linux dependencies 
-```
-this command locally installes all the c/c++ dependencies required (boost, eigen, gmp, mpfr, mpc). Please consider doing this step even if you have previously installed these packages, the code is version specific. To test that everything went fine during this step you can compile a series of tests: 
-```
-make --file=Makefile_linux tests 
-```
-if this step is succesfull you will see binaries in the test folder. To compile the models run
-```
-make --file=Makefile_linux ladders 
-```
-the binaries are authomatically stored in the bin folder of the repository. You can make them available globally or just refer to them in a python script ysing sys.path.insert with the path to FPT/bin. Enjoy the computation :)
+> :warning: **Iporting the modules:** before importing the modules in python you need to source the ```config.sh``` file! This sets the dynamic library paths to the /FPT/lib folder. 
 
+Enjoy :D
 
 # Singularity Container
 
