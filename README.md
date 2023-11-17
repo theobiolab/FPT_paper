@@ -2,7 +2,7 @@
 
 A C++ package with Python binding (Pybind11) for First Passage Time calculations on gene regulatory networks using the Linear Framework, partially based on [kmnam/markov-digraphs](https://github.com/kmnam/markov-digraphs.git) from Kee-Myoung Nam. The code has been tested on macOS Sonoma version 14.0, Ubuntu 20.4 and Centos7
 
-> :warning: **Compiler version:** to compile the code you need gcc/9.2.0 on your path!!!!
+> :warning: **Compiler version:** to compile the code you need gcc/9.2.0 or higher on your path!!!!
 
 
 # Compile the models
