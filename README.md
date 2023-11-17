@@ -31,7 +31,7 @@ make ladders
 ```
 The binaries are stored in the ```/bin``` folder. 
 
-> :warning: **Iporting the modules:** before importing the modules in python you need to source the ```config.sh``` file! This sets the dynamic library paths to the /FPT/lib folder. 
+> :warning: **Importing the modules:** before importing the modules in python you need to source the ```config.sh``` file! This sets the dynamic library paths to the /FPT/lib folder. 
 
 Enjoy :D
 
