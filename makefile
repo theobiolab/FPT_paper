@@ -27,7 +27,7 @@ endif
 
 dependencies: boost_and_eigen libgmp libmpfr libmpc
 tests: test_pybind test_boost test_mpfr test_mpc test_gmp
-ladders: Ladder_3 Ladder_6
+ladders: Ladder_3 Ladder_4 Ladder_5 Ladder_6
 
 boost_and_eigen:
 	@mkdir -p ./lib 
@@ -90,6 +90,12 @@ test_gmp: tests/gmp_test.cpp
 
 Ladder_3: src/Ladder_3_v3.cpp
 	$(CC) $(CFLAGS) $(pybind11) $(eigen) $(boost) $(igmp) $(impfr) $(impc) src/Ladder_3_v3.cpp -o bin/Ladder_3_v3.so ${lgmp} ${lmpfr} ${lmpc} 
+
+Ladder_4: src/Ladder_4.cpp
+	$(CC) $(CFLAGS) $(pybind11) $(eigen) $(boost) $(igmp) $(impfr) $(impc) src/Ladder_4.cpp -o bin/Ladder_4.so ${lgmp} ${lmpfr} ${lmpc} 
+
+Ladder_5: src/Ladder_5.cpp
+	$(CC) $(CFLAGS) $(pybind11) $(eigen) $(boost) $(igmp) $(impfr) $(impc) src/Ladder_5.cpp -o bin/Ladder_5.so ${lgmp} ${lmpfr} ${lmpc} 
 
 Ladder_6: src/Ladder_6_prec_100_v2.cpp
 	$(CC) $(CFLAGS) $(pybind11) $(eigen) $(boost) $(igmp) $(impfr) $(impc) src/Ladder_6_prec_100_v2.cpp -o bin/Ladder_6_prec_100_v2.so ${lgmp} ${lmpfr} ${lmpc} 
