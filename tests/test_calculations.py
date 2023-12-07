@@ -343,7 +343,7 @@ if __name__=="__main__":
         tollearnce_mean_fpt = np.isclose(float(mean_recurrence), float(mean_fpt))
 
         if tollerance_ss and tollearnce_mean_fpt:
-            logging.info(f'Ladder 5 test PASSED \n')
+            logging.info(f'Ladder 6 test PASSED \n')
         else: 
-            logging.info(f'Ladder 5 test FAILED \n') 
+            logging.info(f'Ladder 6 test FAILED \n') 
 

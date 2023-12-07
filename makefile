@@ -99,3 +99,6 @@ Ladder_5: src/Ladder_5.cpp
 
 Ladder_6: src/Ladder_6_prec_100_v2.cpp
 	$(CC) $(CFLAGS) $(pybind11) $(eigen) $(boost) $(igmp) $(impfr) $(impc) src/Ladder_6_prec_100_v2.cpp -o bin/Ladder_6_prec_100_v2.so ${lgmp} ${lmpfr} ${lmpc} 
+
+test_ladders: tests/test_calculations.py
+	source config.sh && cd tests && python test_calculations.py
