@@ -54,3 +54,55 @@ singularity shell -B /path/to/bind:path/to/bind ${path_to_sif}
 ```
 
 Within the container the directory is mounted at /path/to/bind. 
+
+
+# How to run the Docker container locally
+
+The docker-compose file allows to build the image and run the container with one command *from the root directory*:
+
+```
+docker compose up
+```
+The image will build only once. After the first time, the image will be cached and Docker won't build it again,
+unless you force it by adding the ```--build``` flag. If you make some changes after the first build, make sure to rebuild the image.
+
+```docker compose up``` will start the Jupyter Lab server and connect your terminal to the shell inside the container. 
+When the container is started, you should see some urls printed in the terminal. To access Jupyter Lab from your browser,
+use the url starting with ```http://127.0.0.1:8888/lab```. If you prefer, you can also substitute the ip ```127.0.0.1``` with the ```localhost``` domain.
+
+To stop the container, you can hit ```CTRL``` + ```C``` in the terminal. This will only stop the container, but won't remove it.
+To stop and remove the container, run the following command *from the root directory*:
+
+```
+docker compose down
+```
+
+
+# How to prevent files from being copied in the Docker container
+
+If you want to exclude files from the container, add them in the ```.dockerignore``` file.
+
+
+# How to share the image on Docker Hub
+
+Once the image is ready to be shared, you can create an account on Docker Hub and create a repository.
+The repository will be identified with the following name:
+```
+<account>/<repository>
+```
+This will also be the image name.
+
+To build the image and name it with the correct repository name, run from the root directory:
+```
+docker build -t <account>/<repository> .
+```
+If you want to version your image, you could also specify a tag using the format ```<account>/<repository>:<tag>```.
+
+Once the image is built, you can push it to Docker Hub with
+```
+docker push <image-name>
+```
+And you can download it with
+```
+docker pull <image-name>
+```
