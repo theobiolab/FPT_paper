@@ -78,7 +78,6 @@ IOType response_function(Matrix<IOType,Dynamic,1> &ss_vector){  //maybe ss_vecto
     //ladder 3 response = Pr^ss(state 3) + Pr^ss(state 3T)
     response = ss_vector[2] + ss_vector[5];
     return response;
-
 }
 
 
@@ -132,8 +131,9 @@ PYBIND11_MODULE(Ladder_3_v3, m){
                                         py::arg("n_points"), py::arg("deltaTH"), py::arg("low_acc"), py::arg("up_acc"), py::arg("computemeanscore")=true, py::arg("computecvscore")=true,py::arg("sqpar")=0.01)
         .def("redef_score_noRESP",    &childscoring_ladder3<PreciseType, long double>::redef_score_noRESP, 
                                         py::arg("TF_range_noresp"), py::arg("n_points"), py::arg("deltaTH"), py::arg("low_acc"), py::arg("up_acc"), py::arg("computemeanscore")=true, py::arg("computecvscore")=true,py::arg("sqpar")=0.01)
+        .def("get_Mean_vector",      &childscoring_ladder3<PreciseType, long double>::get_Mean_vector, py::arg("use_laplacian_TF"))
         .def("monotonicity",          &childscoring_ladder3<PreciseType, long double>::monotonicity_test,
-                                        py::arg("range_to_check"), py::arg("n_points_for_ss"), py::arg("delta_TH"));        
+                                        py::arg("range_to_check"), py::arg("n_points_for_ss"), py::arg("delta_TH"));      
         //.def("score_no_response",     &childscoring_ladder3<PreciseType, long double>::scoreNoResponse, 
         //                                py::arg("TF_range_for_score"), py::arg("n_points_for_ss"), py::arg("delta_TH"), py::arg("low_acc"), py::arg("up_acc"))      
         //.def("score_response",        &childscoring_ladder3<PreciseType, long double>::scoreWithResponse,

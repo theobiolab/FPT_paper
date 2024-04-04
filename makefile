@@ -1,86 +1,104 @@
 CC = c++
-CFLAGS = -O2 -Wall -shared -std=c++11 -fPIC 
+mac_CFLAGS = -O2 -shared -std=c++14 -fPIC -undefined dynamic_lookup
+linux_CFLAGS = -O2 -shared -std=c++14 -fPIC
+
+# eigen and boost paths in lib folder (assumes make dependencies has been executed)
 eigen = -I $(shell pwd)/lib/eigen-3.4.0
 boost = -I $(shell pwd)/lib/boost_1_81_0
-pybind11 = `python3 -m pybind11 --includes`
-libs = -lmpfr -lmpc
 
-all_container: test_pybind test_boost test_mpfr Ladder_3 Ladder_6 Ladder_6_prec_100 Ladder_6_prec_50 triangle_graph
-ubuntu_setup: dependencies_ubuntu boost eigen test_pybind test_boost test_mpfr
-all_ubuntu: Ladder_3 Ladder_6 Ladder_6_prec_100 Ladder_6_prec_50 triangle_graph
+# gmp, mpfr, mpc and pybind11 paths in lib folder (assumes make dependencies has been executed)
+lgmp = -L$(shell pwd)/lib/gmp-6.3.0/.libs -lgmp
+igmp = -I$(shell pwd)/lib/gmp-6.3.0
+lmpfr = -L$(shell pwd)/lib/mpfr-4.2.1/src/.libs -lmpfr
+impfr = -I$(shell pwd)/lib/mpfr-4.2.1/src
+lmpc = -L$(shell pwd)/lib/mpc-1.3.1/src/.libs -lmpc
+impc = -I$(shell pwd)/lib/mpc-1.3.1/src
+pybind11 = `python -m pybind11 --includes`
 
-dependencies_ubuntu: 
-	sudo apt-get install -y libmpfr-dev
-	sudo apt update && sudo apt upgrade -y
-	sudo apt-get install -y build-essential
-	sudo apt-get install -y libmpfr-dev
-	sudo apt-get install -y libmpc-dev
-	sudo apt-get install -y autotools-dev libicu-dev libbz2-dev libboost-all-dev
-	sudo apt-get install -y wget tar unzip git 
-	sudo add-apt-repository -y ppa:deadsnakes/ppa && sudo apt install -y python3.8 python3-pip
-	pip3 install pybind11
-	pip3 install scipy
-	pip3 install matplotlib
-	pip3 install pandas
+# checks for system specific compile flags
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Linux)
+	CFLAGS = $(linux_CFLAGS)
+else ifeq ($(UNAME_S),Darwin)
+	CFLAGS = $(mac_CFLAGS)
+else
+	$(error Unsupported operating system: $(UNAME_S))
+endif
 
-boost: 
-	mkdir -p ./lib 
-	cd lib
+dependencies: boost_and_eigen libgmp libmpfr libmpc
+tests: test_pybind test_boost test_mpfr test_mpc test_gmp
+ladders: Ladder_3 Ladder_4 Ladder_5 Ladder_6
+
+boost_and_eigen:
+	@mkdir -p ./lib 
+	@cd lib
+
 	wget https://boostorg.jfrog.io/artifactory/main/release/1.81.0/source/boost_1_81_0.tar.gz
-	tar -xf boost_1_81_0.tar.gz
-	rm boost_1_81_0.tar.gz
-	mv -v boost_1_81_0 lib
+	@tar -xf boost_1_81_0.tar.gz
+	@rm boost_1_81_0.tar.gz
 
-eigen: 
-	mkdir -p ./lib 
-	cd lib
 	wget https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz
-	tar -xf eigen-3.4.0.tar.gz
-	rm eigen-3.4.0.tar.gz
-	mv -v eigen-3.4.0 lib
+	@tar -xf eigen-3.4.0.tar.gz
+	@rm eigen-3.4.0.tar.gz
 
-test_pybind: test/pybind_test.cpp
-	$(CC) $(CFLAGS) $(pybind11) test/pybind_test.cpp -o test/pybind_test.so
+	@mv -v boost_1_81_0 lib
+	@mv -v eigen-3.4.0 lib
 
-test_boost: test/boost_test.cpp
-	$(CC) $(boost) test/boost_test.cpp -o test/boost_test.so $(libs)
+libgmp:
+	wget https://ftp.gnu.org/gnu/gmp/gmp-6.3.0.tar.xz
+	@tar -xf gmp-6.3.0.tar.xz
+	@rm gmp-6.3.0.tar.xz
+	@mv -v gmp-6.3.0 lib
+	@cd lib/gmp-6.3.0 && ./configure && make
 
-test_mpfr: test/mpfr_test.cpp
-	$(CC) test/mpfr_test.cpp -o test/mpfr_test.so $(libs)
+libmpfr:
+	wget https://www.mpfr.org/mpfr-current/mpfr-4.2.1.tar.xz
+	@tar -xf mpfr-4.2.1.tar.xz
+	@rm mpfr-4.2.1.tar.xz
+	@mv -v mpfr-4.2.1 lib
+	@cd lib/mpfr-4.2.1 && \
+		LDFLAGS="-L$(shell pwd)/lib/gmp-6.3.0/.libs" \
+		CPPFLAGS="-I$(shell pwd)/lib/gmp-6.3.0" \
+		./configure --with-gmp=$(shell pwd)/lib/gmp-6.3.0 && \
+		make
 
-Ladder_3: src/Ladder_3.cpp
-	$(CC) $(CFLAGS) $(pybind11) $(eigen) $(boost) src/Ladder_3.cpp -o Ladder_3.so $(libs)
+libmpc:
+	wget https://ftp.gnu.org/gnu/mpc/mpc-1.3.1.tar.gz
+	@tar -xf mpc-1.3.1.tar.gz
+	@rm mpc-1.3.1.tar.gz
+	@mv -v mpc-1.3.1 lib
+	@cd lib/mpc-1.3.1 && \
+		LDFLAGS="-L$(shell pwd)/lib/mpfr-4.2.1/src/.libs" \
+		CPPFLAGS="-I$(shell pwd)/lib/mpfr-4.2.1/src" \
+		./configure --with-mpfr=$(shell pwd)/lib/mpfr-4.2.1 && \
+		make
 
-Ladder_6 : src/Ladder_6.cpp
-	$(CC) $(CFLAGS) $(pybind11) $(eigen) $(boost) src/Ladder_6.cpp -o Ladder_6.so $(libs)
+test_pybind: tests/pybind_test.cpp
+	$(CC) $(CFLAGS) $(pybind11) $(eigen) $(boost) $(igmp) $(impfr) $(impc) tests/pybind_test.cpp -o tests/pybind_test.so ${lgmp} ${lmpfr} ${lmpc} 
 
-Ladder_6_prec_100 : src/Ladder_6_prec_100.cpp
-	$(CC) $(CFLAGS) $(pybind11) $(eigen) $(boost) src/Ladder_6_prec_100.cpp -o Ladder_6_prec_100.so $(libs)
+test_boost: tests/boost_test.cpp
+	$(CC) $(CFLAGS) $(pybind11) $(eigen) $(boost) $(igmp) $(impfr) $(impc) tests/boost_test.cpp -o tests/boost_test.so ${lgmp} ${lmpfr} ${lmpc} 
 
-Ladder_6_prec_50 : src/Ladder_6_prec_50.cpp
-	$(CC) $(CFLAGS) $(pybind11) $(eigen) $(boost) src/Ladder_6_prec_50.cpp -o Ladder_6_prec_50.so $(libs)
+test_mpfr: tests/mpfr_test.cpp
+	$(CC) $(CFLAGS) $(pybind11) $(eigen) $(boost) $(igmp) $(impfr) $(impc) tests/mpfr_test.cpp -o tests/mpfr_test.so ${lgmp} ${lmpfr} ${lmpc} 
 
-triangle_graph : src/triangle_graph.cpp
-	$(CC) $(CFLAGS) $(pybind11) $(eigen) $(boost) src/triangle_graph.cpp -o triangle_graph.so $(libs)
+test_mpc: tests/mpc_test.cpp
+	$(CC) $(CFLAGS) $(pybind11) $(eigen) $(boost) $(igmp) $(impfr) $(impc) tests/mpc_test.cpp -o tests/mpc_test.so ${lgmp} ${lmpfr} ${lmpc} 
 
-install: 
-	cp Ladder_3.so $(shell pwd)/bin
-	cp Ladder_6.so $(shell pwd)/bin
-	cp Ladder_6_prec_100.so $(shell pwd)/bin
-	cp Ladder_6_prec_50.so $(shell pwd)/bin
-	cp triangle_graph.so $(shell pwd)/bin
+test_gmp: tests/gmp_test.cpp
+	$(CC) $(CFLAGS) $(pybind11) $(eigen) $(boost) $(igmp) $(impfr) $(impc) tests/gmp_test.cpp -o tests/gmp_test.so ${lgmp} ${lmpfr} ${lmpc} 
 
-install_container: 
-	cp Ladder_3.so /home/fpt/bin
-	cp Ladder_6.so /home/fpt/bin
-	cp Ladder_6_prec_100.so /home/fpt/bin
-	cp Ladder_6_prec_50.so /home/fpt/bin
-	cp triangle_graph.so /home/fpt/bin
+Ladder_3: src/Ladder_3_v3.cpp
+	$(CC) $(CFLAGS) $(pybind11) $(eigen) $(boost) $(igmp) $(impfr) $(impc) src/Ladder_3_v3.cpp -o bin/Ladder_3_v3.so ${lgmp} ${lmpfr} ${lmpc} 
 
-clean: 
-	rm Ladder_3.so
-	rm Ladder_6.so
-	rm Ladder_6_prec_100.so
-	rm Ladder_6_prec_50.so
-	rm triangle_graph.so
+Ladder_4: src/Ladder_4.cpp
+	$(CC) $(CFLAGS) $(pybind11) $(eigen) $(boost) $(igmp) $(impfr) $(impc) src/Ladder_4.cpp -o bin/Ladder_4.so ${lgmp} ${lmpfr} ${lmpc} 
 
+Ladder_5: src/Ladder_5.cpp
+	$(CC) $(CFLAGS) $(pybind11) $(eigen) $(boost) $(igmp) $(impfr) $(impc) src/Ladder_5.cpp -o bin/Ladder_5.so ${lgmp} ${lmpfr} ${lmpc} 
+
+Ladder_6: src/Ladder_6_prec_100_v2.cpp
+	$(CC) $(CFLAGS) $(pybind11) $(eigen) $(boost) $(igmp) $(impfr) $(impc) src/Ladder_6_prec_100_v2.cpp -o bin/Ladder_6_prec_100_v2.so ${lgmp} ${lmpfr} ${lmpc} 
+
+test_ladders: tests/test_calculations.py
+	source config.sh && cd tests && python test_calculations.py

@@ -162,6 +162,36 @@ class scoring2D_v3 {
             // return a vector with the mean first passage time and the CV   
             return output.template cast<IOType>();  
         }
+
+                
+        // Return FPT array from each node 
+        Matrix<IOType, Dynamic, Dynamic> get_Mean_vector(bool use_laplacian_TF = false) {
+            
+            //use a reference to avoid duplicating the matrix
+            
+            Matrix<T, Dynamic, Dynamic> &L = chooselap(this->laplacian, this->laplacian_TF,use_laplacian_TF); 
+             
+            int t = L.rows()-1; 
+            
+            Matrix<T, Dynamic, Dynamic> sublaplacian = L.block(0, 0, t, t);
+            Matrix<T, Dynamic, 1> b = Matrix<T, Dynamic, 1>::Zero(t);
+            Matrix<T, Dynamic, Dynamic> sublaplacian_t=sublaplacian.transpose();
+            
+            // Get the left-hand matrix in the first-passage time linear system
+            Matrix<T, Dynamic, Dynamic> A_Mu  = sublaplacian_t*sublaplacian_t;
+
+            // Get the right-hand side vector in the first-passage time linear system
+            for (int i=0; i<L.cols()-1; i++){
+                b(i) = L(t, i); 
+            }
+
+            // Solve the linear system with QR decomposition 
+            Matrix<T, Dynamic, 1> solution_Mu  = solveByQRD<T>(A_Mu, b);
+            //T mean_FPT = solution_Mu(0);
+
+            // return mean first passage time vector
+            return solution_Mu.template cast<IOType>();
+        }
         
         
         // Get steady state 
