@@ -5,3 +5,4 @@ services:
     build: .
     ports:
       - 8888:8888
+    command: /bin/bash -c "source /opt/conda/etc/profile.d/conda.sh && conda activate fpt_env && jupyter lab --allow-root --no-browser --ip=0.0.0.0"

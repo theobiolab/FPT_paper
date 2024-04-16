@@ -25,6 +25,9 @@ else
 	$(error Unsupported operating system: $(UNAME_S))
 endif
 
+dependencies_docker: boost_and_eigen
+ladders_docker: Ladder_3_dock Ladder_4_dock Ladder_5_dock Ladder_6_dock
+
 dependencies: boost_and_eigen libgmp libmpfr libmpc
 tests: test_pybind test_boost test_mpfr test_mpc test_gmp
 ladders: Ladder_3 Ladder_4 Ladder_5 Ladder_6
@@ -99,6 +102,19 @@ Ladder_5: src/Ladder_5.cpp
 
 Ladder_6: src/Ladder_6_prec_100_v2.cpp
 	$(CC) $(CFLAGS) $(pybind11) $(eigen) $(boost) $(igmp) $(impfr) $(impc) src/Ladder_6_prec_100_v2.cpp -o bin/Ladder_6_prec_100_v2.so ${lgmp} ${lmpfr} ${lmpc} 
+
+Ladder_3_dock: src/Ladder_3_v3.cpp
+	$(CC) $(CFLAGS) $(pybind11) $(eigen) $(boost) src/Ladder_3_v3.cpp -o bin/Ladder_3_v3.so -lmpfr -lmpc
+
+Ladder_4_dock: src/Ladder_4.cpp
+	$(CC) $(CFLAGS) $(pybind11) $(eigen) $(boost) src/Ladder_4.cpp -o bin/Ladder_4.so -lmpfr -lmpc
+
+Ladder_5_dock: src/Ladder_5.cpp
+	$(CC) $(CFLAGS) $(pybind11) $(eigen) $(boost) src/Ladder_5.cpp -o bin/Ladder_5.so -lmpfr -lmpc
+
+Ladder_6_dock: src/Ladder_6_prec_100_v2.cpp
+	$(CC) $(CFLAGS) $(pybind11) $(eigen) $(boost) src/Ladder_6_prec_100_v2.cpp -o bin/Ladder_6_prec_100_v2.so -lmpfr -lmpc
+
 
 test_ladders: tests/test_calculations.py
 	source config.sh && cd tests && python test_calculations.py
