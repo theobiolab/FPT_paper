@@ -36,7 +36,7 @@ boost_and_eigen:
 	@mkdir -p ./lib 
 	@cd lib
 
-	wget https://boostorg.jfrog.io/artifactory/main/release/1.81.0/source/boost_1_81_0.tar.gz
+	wget https://archives.boost.io/release/1.81.0/source/boost_1_81_0.tar.gz
 	@tar -xf boost_1_81_0.tar.gz
 	@rm boost_1_81_0.tar.gz
 
