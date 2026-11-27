@@ -7,7 +7,7 @@ A C++ package with Python binding (Pybind11) for First Passage Time calculations
 # Paper information
 This repository contains all the data and code to reproduce the figures and results in the paper by Ravanelli, Nam, Gunawardena, Martinez-Corral 2025. Please cite accordingly:
 
-    Ravanelli, G., Nam, K.-M., Gunawardena, J. & Martinez-Corral, R. [Decoupling between activation time and steady-state level in input-output responses](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1014288). PLoS Comput. Biol. 22, e1014288 (2026).
+Ravanelli, G., Nam, K.-M., Gunawardena, J. & Martinez-Corral, R. [Decoupling between activation time and steady-state level in input-output responses](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1014288). PLoS Comput. Biol. 22, e1014288 (2026).
     
   
 
